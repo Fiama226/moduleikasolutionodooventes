@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- ============================================ -->
+    <!-- PROFORMA SEQUENCE: PF/YYYY/NNNN (No reset)  -->
+    <!-- ============================================ -->
+    <record id="seq_sale_order_pf" model="ir.sequence">
+        <field name="name">Sale Order Proforma</field>
+        <field name="code">sale.order.seq_pf</field>
+        <field name="prefix">PF/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- BC SEQUENCE: BC/YYYY/NNNN (Annual reset)    -->
+    <!-- ============================================ -->
+    <record id="seq_sale_order_bc" model="ir.sequence">
+        <field name="name">Sale Order Bon de Commande</field>
+        <field name="code">sale.order.seq_bc</field>
+        <field name="prefix">BC/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Date range for BC sequence (annual reset) -->
+    <record id="seq_sale_order_bc_date_range" model="ir.sequence.date_range">
+        <field name="sequence_id" ref="seq_sale_order_bc"/>
+        <field name="date_from" eval="time.strftime('%Y-01-01')"/>
+        <field name="date_to" eval="time.strftime('%Y-12-31')"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_company_view_form_ika" model="ir.ui.view">
+        <field name="name">res.company.view.form.ika</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Signataire Proforma" name="page_signatory">
+                    <group>
+                        <group string="Informations Signataire">
+                            <field name="proforma_signatory_name" placeholder="ex: YAYA OUATTARA"/>
+                            <field name="proforma_signatory_title" placeholder="ex: Directeur Général"/>
+                        </group>
+                        <group string="Signature">
+                            <field name="proforma_signature_image"
+                                   widget="image"
+                                   class="oe_avatar"
+                                   placeholder="Image signature + cachet"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

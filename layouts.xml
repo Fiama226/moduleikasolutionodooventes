@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- ============================================ -->
+<!-- CUSTOM HEADER — overrides web.external_layout header -->
+<!-- Called via t-call="landry_ika_odoo_module.external_layout_ika" -->
+<!-- ============================================ -->
+<template id="external_layout_ika">
+    <t t-set="company" t-value="company or docs[0].company_id"/>
+
+    <div class="header" style="width: 100%; border-bottom: 2px solid #000000; border-top: none; border-left: none; border-right: none;">
+        <div style="display: table; width: 100%; table-layout: fixed; border-collapse: collapse;">
+            <div style="display: table-cell; vertical-align: middle; width: 15%; text-align: left; border: none;">
+                <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px; max-width: 100%; width: 100%; height: 80px; display: block;"/>
+            </div>
+            <div style="display: table-cell; vertical-align: middle; width: 80%; text-align: left; border: none;">
+                <span style="font-weight: bold; text-transform: uppercase; font-size: 18px; color: black; font-family: Arial, Helvetica, sans-serif; line-height: 1.4;">
+                    DÉVELOPPEMENT &amp; INTÉGRATION D'APPLICATIONS - SOLUTIONS CLOUD &amp; LICENCES - INFRASTRUCTURES SERVEURS &amp; RÉSEAUX – SUPPORT TECHNIQUE &amp; INFOGÉRANCE – PRESTATION ET DIVERS
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="article" style="padding: 20px;">
+        <t t-out="0"/>
+    </div>
+
+    <div class="footer" style="width: 100%;">
+        <div style="background-color: #CC0000; height: 4px; width: 100%;"></div>
+        <div style="background-color: #A0A0A0; padding: 8px 15px; text-align: center;">
+            <div style="font-size: 8px; color: black; font-family: Arial, Helvetica, sans-serif; line-height: 1.5;">
+                08 BP 11381 Ouagadougou 08 - Burkina Faso - Siège Social : Avenue de la Dignité, Sect. 26, parcelle 07, lot 40
+                DME CENTRE I - RN - IFU N° : 00147112U - RCCM N° : BF-OUA-01-2020-B13-10626
+                <br/>
+                Cpte CBI : BF 148 01001 062424024101-75 BPBF BF253-01002-005000806501-86
+                <br/>
+                Tél : +226 25 65 59 54 / 72 08 90 90 - E-mail : infos@ikasolution.com
+                - Web : <a href="http://www.ikasolution.com" style="color: #0000EE; text-decoration: underline;">www.ikasolution.com</a>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Standalone header template (reusable) -->
+<template id="report_ika_header">
+    <t t-set="company" t-value="company or docs[0].company_id"/>
+    <div class="header" style="width: 100%; border-bottom: 2px solid #000000; border-top: none; border-left: none; border-right: none;">
+        <div style="display: table; width: 100%; table-layout: fixed; border-collapse: collapse;">
+            <div style="display: table-cell; vertical-align: middle; width: 15%; text-align: left; border: none;">
+                <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px; max-width: 100%; width: 100%; height: 80px; display: block;"/>
+            </div>
+            <div style="display: table-cell; vertical-align: middle; width: 80%; text-align: left; border: none;">
+                <span style="font-weight: bold; text-transform: uppercase; font-size: 18px; color: black; font-family: Arial, Helvetica, sans-serif; line-height: 1.4;">
+                    DÉVELOPPEMENT &amp; INTÉGRATION D'APPLICATIONS - SOLUTIONS CLOUD &amp; LICENCES - INFRASTRUCTURES SERVEURS &amp; RÉSEAUX – SUPPORT TECHNIQUE &amp; INFOGÉRANCE – PRESTATION ET DIVERS
+                </span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Standalone footer template (reusable) -->
+<template id="report_ika_footer">
+    <div class="footer" style="width: 100%;">
+        <div style="background-color: #CC0000; height: 10px; width: 100%;"></div>
+        <div style="background-color: #A0A0A0; padding: 8px 15px; text-align: center;">
+            <div style="font-size: 12px; color: black; font-family: Arial, Helvetica, sans-serif; line-height: 1.5;">
+                08 BP 11381 Ouagadougou 08 - Burkina Faso - Siège Social : Avenue de la Dignité, Sect. 26, parcelle 07, lot 40
+                DME CENTRE I - RN - IFU N° : 00147112U - RCCM N° : BF-OUA-01-2020-B13-10626
+                <br/>
+                Cpte CBI : BF 148 01001 062424024101-75 BPBF BF253-01002-005000806501-86
+                <br/>
+                Tél : +226 25 65 59 54 / 72 08 90 90 - E-mail : infos@ikasolution.com
+                - Web : <a href="http://www.ikasolution.com" style="color: #0000EE; text-decoration: underline;">www.ikasolution.com</a>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>

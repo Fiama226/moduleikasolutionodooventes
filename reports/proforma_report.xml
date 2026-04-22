@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================ -->
+    <!-- PROFORMA REPORT                              -->
+    <!-- ============================================ -->
+    <template id="report_proforma_document">
+        <t t-call="landry_ika_odoo_module.external_layout_ika">
+            <t t-set="o" t-value="doc"/>
+
+            <!-- Date -->
+            <div style="text-align: right; margin-bottom: 20px; margin-top: 20px; font-style: italic; font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                OUAGADOUGOU, le <span t-field="o.date_order" t-options='{"format": "d MMMM y"}'/>
+            </div>
+
+            <!-- Title band -->
+            <div style="text-align: center; background-color: #f0f0f0; padding: 12px 10px; margin-bottom: 15px;">
+                <h1 style="font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0; color: black; font-family: Arial, Helvetica, sans-serif;">
+                    PROFORMA N&#176; <span t-field="o.proforma_number"/>
+                </h1>
+            </div>
+
+            <!-- Client info -->
+            <div style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: black; margin-bottom: 12px;">
+                <p style="margin: 0 0 8px 0; line-height: 1.6;">
+                    <strong>DOIT :</strong>
+                    <span t-field="o.partner_id.name"/>
+                    <br/>
+                    <span t-field="o.partner_id.street"/>
+                    <t t-if="o.partner_id.street2">
+                        , <span t-field="o.partner_id.street2"/>
+                    </t>
+                </p>
+                <t t-if="o.partner_id.partner_rccm or o.partner_id.partner_ifu or o.partner_id.partner_division_fiscale or o.partner_id.partner_regime_fiscal">
+                    <table style="width: 100%; margin: 0 0 8px 0; line-height: 1.6; border-collapse: collapse; border: none;">
+                        <tr style="border: none;">
+                            <td style="width: 25%; padding: 0; border: none;" t-if="o.partner_id.partner_rccm">
+                                <strong>N° RCCM:</strong>
+                                <span t-field="o.partner_id.partner_rccm"/>
+                            </td>
+                            <td style="width: 25%; padding: 0; border: none;" t-if="o.partner_id.partner_ifu">
+                                <strong>N° IFU:</strong>
+                                <span t-field="o.partner_id.partner_ifu"/>
+                            </td>
+                            <td style="width: 25%; padding: 0; border: none;" t-if="o.partner_id.partner_division_fiscale">
+                                <strong>Division Fiscale:</strong>
+                                <span t-field="o.partner_id.partner_division_fiscale"/>
+                            </td>
+                            <td style="width: 25%; padding: 0; border: none;" t-if="o.partner_id.partner_regime_fiscal">
+                                <strong>Régime Fiscal:</strong>
+                                <span t-field="o.partner_id.partner_regime_fiscal"/>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
+                <t t-if="o.partner_id.phone or o.partner_id.mobile or o.partner_id.email">
+                    <p style="margin: 0 0 8px 0; line-height: 1.6;">
+                        <t t-if="o.partner_id.phone or o.partner_id.mobile">
+                            <b>TEL:</b>
+                        </t>
+                        <t t-if="o.partner_id.phone">
+                            <span t-field="o.partner_id.phone"/>
+                        </t>
+                        <t t-if="o.partner_id.phone and o.partner_id.mobile"> / </t>
+                        <t t-if="o.partner_id.mobile">
+                            <span t-field="o.partner_id.mobile"/>
+                        </t>
+                        &#9;
+                        <t t-if="o.partner_id.email">
+                            <b>Email:</b>
+                            <span t-field="o.partner_id.email"/>
+                        </t>
+                    </p>
+                </t>
+                <p t-if="o.proforma_object" style="margin: 0 0 8px 0; line-height: 1.6;">
+<strong>OBJET :</strong>
+<span t-field="o.proforma_object"/>
+</p>
+                <p style="margin: 0; line-height: 1.6; text-align: center;">
+                    <strong>Commercial(e) :</strong>
+                    <span t-field="o.create_uid.name"/>
+                    &#9;<strong>Expiration :</strong>
+                    <span t-field="o.validity_date"/>
+                </p>
+            </div>
+
+            <!-- Order lines table -->
+            <t t-set="display_discount" t-value="any(line.discount for line in o.order_line)"/>
+            <t t-set="lines_to_report" t-value="list(enumerate(o.order_line))"/>
+            <table class="o_has_total_table table o_main_table">
+                <thead style="display: table-row-group">
+                    <tr style="background-color: #797979; font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: black;">
+                        <th name="th_description" class="text-start">Désignation</th>
+                        <th name="th_quantity" class="text-end text-nowrap">Quantité</th>
+                        <th name="th_priceunit" class="text-end text-nowrap">Prix Unitaire</th>
+                        <th name="th_discount" t-if="display_discount" class="text-end">
+                            <span>Remise %</span>
+                        </th>
+                        <th name="th_subtotal" class="text-end">
+                            <span>Montant</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="sale_tbody">
+                    <t t-set="current_subtotal" t-value="0"/>
+                    <t t-set="current_section" t-value="None"/>
+                    <t t-foreach="lines_to_report" t-as="line_info">
+                        <t t-set="line_index" t-value="line_info[0]"/>
+                        <t t-set="line" t-value="line_info[1]"/>
+                        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal"/>
+                        <t t-set="line_last" t-value="line_index == (len(lines_to_report) - 1)"/>
+                        
+                        <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
+                            <t t-if="not line.display_type">
+                                <td name="td_name">
+                                    <span t-field="line.name"/>
+                                </td>
+                                <td name="td_quantity" class="o_td_quantity text-end">
+                                    <span t-field="line.product_uom_qty" class="text-nowrap"/>
+                                    <span t-field="line.product_uom"/>
+                                </td>
+                                <td name="td_priceunit" class="text-end text-nowrap">
+                                    <span t-field="line.price_unit"/>
+                                </td>
+                                <td t-if="display_discount" class="text-end">
+                                    <span t-field="line.discount"/>
+                                </td>
+                                <td name="td_subtotal" class="text-end">
+                                    <span t-field="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </t>
+                            <t t-elif="line.display_type == 'line_section'">
+                                <td name="td_section_line" colspan="99">
+                                    <span t-field="line.name"/>
+                                </td>
+                                <t t-set="current_section" t-value="line"/>
+                                <t t-set="current_subtotal" t-value="0"/>
+                            </t>
+                            <t t-elif="line.display_type == 'line_note'">
+                                <td name="td_note_line" colspan="99">
+                                    <span t-field="line.name"/>
+                                </td>
+                            </t>
+                        </tr>
+                        
+                        <t t-if="current_section and (line_last or lines_to_report[line_index+1][1].display_type == 'line_section') and not line.is_downpayment">
+                            <tr class="is-subtotal text-end">
+                                <td name="td_section_subtotal" colspan="99">
+                                    <strong class="mr16">Sous-total</strong>
+                                    <span t-out="current_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                            <t t-set="current_section" t-value="None"/>
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="clearfix">
+                <div id="total" class="row">
+                    <div class="col-6"/>
+                    <div class="col-6">
+                        <table class="table table-sm table-borderless o_has_total_table" style="width: 100%;">
+                            <tr>
+                                <td style="font-weight: bold; text-align: right;">
+                                    <span>Total HT</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold; text-align: right;">
+                                    <span>Taxes (18%)</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr class="o_total_row">
+                                <td style="font-weight: bold; text-align: right;">
+                                    <strong>TOTAL TTC</strong>
+                                </td>
+                                <td style="text-align: right;">
+                                    <strong t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-style: italic; text-align: left; font-size: 11px; margin-top: 20px;">
+                Arrêtée la présente proforma à la somme de :
+                <strong t-esc="o.currency_id.amount_to_text(o.amount_total)"/>
+            </p>
+
+            <!-- Payment terms -->
+            <div t-if="o.payment_term_id" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; margin-top: 20px;">
+                <strong>Conditions de paiement :</strong>
+                <span t-field="o.payment_term_id.name"/>
+            </div>
+
+            <!-- Notes -->
+            <div t-if="o.note" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; margin-top: 15px; padding-top: 10px;">
+                <strong>Remarques :</strong>
+                <br/>
+                <span t-field="o.note"/>
+            </div>
+
+            <!-- Signatory block -->
+            <t t-set="signatory_name" t-value="o.company_id.proforma_signatory_name or 'YAYA OUATTARA'"/>
+            <t t-set="signatory_title" t-value="o.company_id.proforma_signatory_title or 'Directeur Général'"/>
+            <div style="text-align: right; margin-top: 40px; font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                <div t-if="o.company_id.proforma_signature_image" style="margin-bottom: 5px;">
+                    <img t-att-src="image_data_uri(o.company_id.proforma_signature_image)" style="max-height: 120px; max-width: 200px;"/>
+                </div>
+                <strong t-esc="signatory_title"/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <span t-esc="signatory_name" style="font-weight: bold"/>
+            </div>
+
+        </t>
+    </template>
+
+    <template id="report_proforma">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="landry_ika_odoo_module.report_proforma_document"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report action -->
+    <record id="action_report_proforma" model="ir.actions.report">
+        <field name="name">Proforma</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">landry_ika_odoo_module.report_proforma</field>
+        <field name="report_file">landry_ika_odoo_module.report_proforma</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form,list</field>
+    </record>
+
+</odoo>
