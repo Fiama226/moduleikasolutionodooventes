@@ -8,8 +8,31 @@
         <field name="arch" type="xml">
 
             <field name="name" position="after">
-                <field name="proforma_number" invisible="proforma_number == False"/>
+<div class="d-flex align-items-baseline" 
+     invisible="state not in ('sale', 'done') or proforma_number == False">
+    <span style="font-weight: bold; font-size: 13px; color: #7c7c7c; margin-right: 5px;">
+        N°PROFORMA
+    </span>
+    <field name="proforma_number"
+           readonly="1"
+           nolabel="1"
+           style="font-weight: bold; font-size: 13px; color: #7c7c7c;"/>
+</div>
+
+                <label for="proforma_object" string="Objet :"/>
+                <field name="proforma_object"
+                       placeholder="ex: Fourniture de matériel informatique"
+                       nolabel="1"
+                       style="max-width: 300px;"/>
             </field>
+
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="proforma_terms"
+                       string="Conditions Générales"
+                       invisible="state not in ('draft', 'sent')"
+                       colspan="2"
+                       placeholder="Conditions générales de la proforma..."/>
+            </xpath>
 
         </field>
     </record>

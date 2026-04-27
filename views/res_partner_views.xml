@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_partner_view_form_ika" model="ir.ui.view">
+        <field name="name">res.partner.view.form.ika</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='sales_purchases']//group[@name='sale']" position="after">
+                <group string="Informations Fiscales" name="fiscal_info">
+                    <field name="partner_rccm" placeholder="ex: BF-OUA-01-2020-B13-10626"/>
+                    <field name="partner_ifu" placeholder="ex: 00147112U"/>
+                    <field name="partner_division_fiscale" placeholder="CME, RSI ou RNI"/>
+                    <field name="partner_regime_fiscal" placeholder="ex: Régime de l'Impôt sur les Sociétés"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

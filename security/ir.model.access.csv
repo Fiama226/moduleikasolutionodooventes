@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_sale_order_ika,sale.order.ika,sale.model_sale_order,sales_team.group_sale_salesman,1,1,1,0
 access_res_company_ika,res.company.ika,base.model_res_company,base.group_system,1,1,1,0
+access_res_partner_ika,res.partner.ika,base.model_res_partner,base.group_user,1,1,1,0

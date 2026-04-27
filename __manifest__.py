@@ -20,6 +20,7 @@
         "data/sequence_data.xml",
         "views/sale_order_views.xml",
         "views/res_company_views.xml",
+        "views/res_partner_views.xml",
         "layouts.xml",
         "reports/proforma_report.xml",
     ],
