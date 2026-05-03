@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="invoice_report_document">
+    <t t-set="o" t-value="doc"/>
+    <t t-if="o.custom_report_template == 'first_down_payment_invoice_1' or (not o.custom_report_template and o.is_downpayment and o.downpayment_sequence_number &lt;= 1)">
+        <t t-call="landry_ika_odoo_module.first_down_payment_invoice_1_content"/>
+    </t>
+    <t t-elif="o.custom_report_template == 'nth_down_payment_invoice' or (not o.custom_report_template and o.is_downpayment and o.downpayment_sequence_number &gt; 1)">
+        <t t-call="landry_ika_odoo_module.nth_down_payment_invoice_content"/>
+    </t>
+    <t t-elif="o.custom_report_template == 'final_invoice'">
+        <t t-call="landry_ika_odoo_module.final_invoice_content"/>
+    </t>
+    <t t-else="">
+        <t t-call="landry_ika_odoo_module.simple_invoice_1_content"/>
+    </t>
+</template>
+
+<template id="invoice_report_template">
+<t t-call="web.html_container">
+<t t-foreach="docs" t-as="doc">
+<t t-call="landry_ika_odoo_module.external_layout_ika">
+<t t-call="landry_ika_odoo_module.invoice_report_document"/>
+</t>
+</t>
+</t>
+</template>
+
+<record id="action_report_custom_invoice" model="ir.actions.report">
+<field name="name">Facture Personnalisee</field>
+<field name="model">account.move</field>
+<field name="report_type">qweb-pdf</field>
+<field name="report_name">landry_ika_odoo_module.invoice_report_template</field>
+<field name="report_file">landry_ika_odoo_module.invoice_report_template</field>
+<field name="print_report_name">'Facture - %s' % (object.name or '').replace('/', '_')</field>
+<field name="binding_model_id" ref="account.model_account_move"/>
+<field name="binding_view_types">form</field>
+</record>
+
+<record id="account.account_invoices" model="ir.actions.report">
+<field name="report_name">landry_ika_odoo_module.invoice_report_template</field>
+<field name="report_file">landry_ika_odoo_module.invoice_report_template</field>
+</record>
+
+</odoo>

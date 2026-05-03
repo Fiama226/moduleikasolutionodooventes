@@ -1,4 +1,5 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class ResCompany(models.Model):
@@ -33,6 +34,22 @@ class ResPartner(models.Model):
     partner_regime_fiscal = fields.Char(string="Régime Fiscal")
 
 
+class IrActionsReport(models.Model):
+    _inherit = "ir.actions.report"
+
+    def render_qweb_pdf(self, res_ids=None, data=None):
+        if self.report_name == "landry_ika_odoo_module.report_bon_commande":
+            orders = self.env["sale.order"].browse(res_ids or [])
+            for order in orders:
+                if order.state not in ("sale", "done"):
+                    raise UserError(
+                        _(
+                            "Le Bon de Commande ne peut être imprimé que pour une commande confirmée (Proforma validée)."
+                        )
+                    )
+        return super().render_qweb_pdf(res_ids=res_ids, data=data)
+
+
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
@@ -44,7 +61,7 @@ class SaleOrder(models.Model):
     )
     proforma_object = fields.Char(
         string="Objet",
-        required=True,
+        required=False,
         help="Objet de la proforma (ex: Fourniture de matériel informatique)",
     )
     proforma_terms = fields.Html(
@@ -94,3 +111,10 @@ class SaleOrder(models.Model):
                 .next_by_code("sale.order.seq_bc")
             )
         return res
+
+    def _get_report_bon_commande(self):
+        self.ensure_one()
+        if self.state not in ("sale", "done"):
+            raise UserError(
+                _("Le Bon de Commande ne peut être imprimé que pour une commande confirmée (Proforma validée).")
+            )

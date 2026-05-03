@@ -34,7 +34,7 @@
                        placeholder="Conditions générales de la proforma..."/>
             </xpath>
 
-        </field>
+    </field>
     </record>
 
-</odoo>
+    </odoo>
