@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================ -->
+    <!-- PROFORMA REPORT - VERSION FINALE             -->
+    <!-- ============================================ -->
+    <template id="report_proforma_signature_document">
+        <t t-call="landry_ika_odoo_module.external_layout_ika">
+        <main> 
+            <t t-set="o" t-value="doc or (docs and docs[0])"/>
+            <t t-if="o">
+                <div class="page" style="font-family: Arial, Helvetica, sans-serif; color: #000000;">
+
+                    <!-- Date -->
+                    <div style="text-align: right; margin-bottom: 15px; margin-top: 25px; font-size: 12px;">
+                    OUAGADOUGOU, le <span t-field="o.date_order" t-options='{"format": "d MMMM Y"}'/>
+                    </div>
+
+                    <!-- Titre -->
+                    <div style="text-align: center; background-color: #615e5e; padding: 18px 10px; margin-bottom: 25px;">
+                        <h1 style="font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0;letter-spacing: 1px;">
+                        PROFORMA N° <span t-field="o.proforma_number"/>
+                        </h1>
+                    </div>
+
+                    <!-- Bloc Client -->
+                    <div style="padding: 15px 20px; margin-bottom: 15px;padding-bottom: 0;">
+
+                        <!-- Nom & Adresse -->
+                        <p style="margin: 0 0 10px 0; line-height: 1.6;">
+                            <span style="font-size: 18px;font-weight: bold; color: #000000;">DOIT :</span>
+                            <strong style="font-size: 14px;" t-field="o.partner_id.name"/>
+                            <br/>
+                            <span style="" t-field="o.partner_id.street"/>
+                            <t t-if="o.partner_id.street2">
+                            ,                                <span t-field="o.partner_id.street2"/>
+                            </t>
+                        </p>
+
+                        <!-- Infos Fiscales -->
+                        <t t-if="o.partner_id.partner_rccm or o.partner_id.partner_ifu or o.partner_id.partner_division_fiscale or o.partner_id.partner_regime_fiscal">
+                            <table style="width: 100%; margin: 10px 0; font-size: 11px; border-collapse: collapse; " class="table table-borderless">
+                                <tr>
+                                    <td t-if="o.partner_id.partner_rccm" style="padding: 2px 10px 2px 0;">
+                                        <strong>N° RCCM:</strong>
+                                        <span t-field="o.partner_id.partner_rccm"/>
+                                    </td>
+                                    <td t-if="o.partner_id.partner_ifu" style="padding: 2px 10px 2px 0;">
+                                        <strong>N° IFU:</strong>
+                                        <span t-field="o.partner_id.partner_ifu"/>
+                                    </td>
+                                    <td t-if="o.partner_id.partner_division_fiscale" style="padding: 2px 10px 2px 0;">
+                                        <strong>Division Fiscale:</strong>
+                                        <span t-field="o.partner_id.partner_division_fiscale"/>
+                                    </td>
+                                    <td t-if="o.partner_id.partner_regime_fiscal" style="padding: 2px 10px 2px 0;">
+                                        <strong>Régime Fiscale:</strong>
+                                        <span t-field="o.partner_id.partner_regime_fiscal"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <!-- Contact -->
+                        <t t-if="o.partner_id.phone or o.partner_id.mobile or o.partner_id.email">
+                            <div style="font-size: 11px; margin-bottom: 8px;">
+                                <t t-if="o.partner_id.phone or o.partner_id.mobile">
+                                    <strong>Tél:</strong>
+                                    <span t-field="o.partner_id.phone"/>
+                                    <t t-if="o.partner_id.phone and o.partner_id.mobile"> / </t>
+                                    <span t-field="o.partner_id.mobile"/>
+                                </t>
+                                <t t-if="o.partner_id.email">
+                                    <span style="margin-left: 15px;">
+                                        <strong>Email:</strong>
+                                        <span t-field="o.partner_id.email"/>
+                                    </span>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Objet -->
+                        <p t-if="o.proforma_object" style="margin: 10px 0 0 0; padding-top: 10px; font-size: 12px;">
+                            <strong>OBJET :</strong>
+                            <span t-field="o.proforma_object"/>
+                        </p>
+                    </div>
+
+                    <!-- Infos Commerciales -->
+                    <div style="display: table; width: 100%; margin-bottom: 10px; font-size: 11px;">
+                        <div style="display: table-row;">
+                            <div style="display: table-cell; width: 50%; padding: 10px;  text-align: right;">
+                                <strong>Commercial(e) :</strong>
+                                <span t-field="o.create_uid.name"/>
+                            </div>
+                            <div style="display: table-cell; width: 50%; text-align: left; padding: 10px;">
+                                <strong>Expiration :</strong>
+                                <span t-field="o.validity_date"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tableau des lignes -->
+                    <t t-set="display_discount" t-value="any(line.discount for line in o.order_line)"/>
+                    <t t-set="lines_to_report" t-value="list(enumerate(o.order_line))"/>
+
+                    <table class="table table-bordered" style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 11px;">
+                        <!-- En-tête -->
+                        <thead>
+                            <tr style="background-color: #615e5e; color: black;font-weight: bold; font-size: 18px;">
+                                <th style="padding: 10px; text-align: left; border: 1px solid #000000;">Description</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #000000;">Quantité</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #000000;">Prix Unitaire</th>
+                                <th t-if="display_discount" style="padding: 10px; text-align: right; border: 1px solid #000000;">Remise(%)</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #000000;">Montant </th>
+                            </tr>
+                        </thead>
+                        <!-- Corps -->
+                        <tbody>
+                            <t t-set="current_subtotal" t-value="0"/>
+                            <t t-set="current_section" t-value="None"/>
+                            <t t-foreach="lines_to_report" t-as="line_info">
+                                <t t-set="line_index" t-value="line_info[0]"/>
+                                <t t-set="line" t-value="line_info[1]"/>
+                                <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal"/>
+                                <t t-set="line_last" t-value="line_index == (len(lines_to_report) - 1)"/>
+
+                                <tr t-att-class="'fw-bold' if line.display_type == 'line_section' else 'fst-italic' if line.display_type == 'line_note' else ''" t-att-style="'' if line.display_type == 'line_section' else ''">
+
+                                    <t t-if="not line.display_type">
+                                        <td style="padding: 10px; border: 1px solid #000000;">
+                                            <span t-field="line.name"/>
+                                        </td>
+                                        <td style="padding: 10px; text-align: right; white-space: nowrap; border: 1px solid #000000;">
+                                            <span t-field="line.product_uom_qty"/>
+                                            <span t-field="line.product_uom"/>
+                                        </td>
+                                        <td style="padding: 10px; text-align: right; border: 1px solid #000000;">
+                                            <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                        <td t-if="display_discount" style="padding: 10px; text-align: right; border: 1px solid #000000;">
+                                            <span t-field="line.discount"/>
+%
+                                        </td>
+                                        <td style="padding: 10px; text-align: right; font-weight: bold; border: 1px solid #000000;">
+                                            <span t-field="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </t>
+                                    <t t-elif="line.display_type == 'line_section'">
+                                        <td colspan="99" style="padding: 10px; font-weight: bold; border: 1px solid #000000;">
+                                            <span t-field="line.name"/>
+                                        </td>
+                                        <t t-set="current_section" t-value="line"/>
+                                        <t t-set="current_subtotal" t-value="0"/>
+                                    </t>
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <td colspan="99" style="padding: 10px; color: #666; border: 1px solid #000000;">
+                                            <span t-field="line.name"/>
+                                        </td>
+                                    </t>
+                                </tr>
+
+                                <!-- Sous-total de section -->
+                                <t t-if="current_section and (line_last or lines_to_report[line_index+1][1].display_type == 'line_section') and not line.is_downpayment">
+                                    <tr style="background-color: #f5f5f5;">
+                                        <td colspan="99" style="padding: 8px; text-align: right; font-weight: bold; border: 1px solid #ddd;">
+                        Sous-total : <span t-out="current_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                    <t t-set="current_section" t-value="None"/>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Totaux -->
+                    <div style="width: 100%; margin-top: 20px;">
+                        <div style="width: 30%; margin-left: auto; overflow: hidden;">
+                            <table style="width: 100%;font-size: 11px; border:none" class="table table-borderless">
+                                <tr style="border:none;">
+                                    <td style="padding: 10px; font-weight: bold;border:none;">Total HT</td>
+                                    <td style="padding: 10px; text-align: right;border:none;">
+                                        <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr style="border:none;">
+                                    <td style="padding: 10px; font-weight: bold;border:none;">Taxes (18%)</td>
+                                    <td style="padding: 10px; text-align: right;border:none;">
+                                        <span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr style="border:none">
+                                    <td style="padding: 12px; font-weight: 900; text-transform: uppercase;border:none;">Total TTC</td>
+                                    <td style="padding: 12px; text-align: right; font-weight: 900; font-size: 13px;border:none;">
+                                        <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Montant en lettres -->
+                    <div style="padding: 10px 15px; margin-top: 25px; font-size: 11px; font-style: italic;">
+                    Arrêtée la présente proforma à la somme de : 
+                        <strong style="text-transform: uppercase; font-style: normal;" t-esc="o.currency_id.amount_to_text(o.amount_total)"/>
+ (                        <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+).
+                    </div>
+
+                    <!-- Conditions de paiement -->
+                    <div t-if="o.payment_term_id" style="font-size: 11px; margin-top: 20px; padding: 10px; border-radius: 4px;">
+                        <strong>Conditions de paiement :</strong>
+                        <span t-field="o.payment_term_id.name"/>
+                    </div>
+
+                    <!-- Conditions Générales (Modifiable par proforma) -->
+                    <div t-if="o.proforma_terms" style="font-size: 10px; margin-top: 15px; padding: 10px">
+                        <strong>Conditions Générales :</strong>
+                        <br/>
+                        <span t-field="o.proforma_terms"/>
+                    </div>
+
+                    <!-- Notes -->
+                    <div t-if="o.note" style="font-size: 11px; margin-top: 15px; padding-top: 10px;">
+                        <strong>Remarques :</strong>
+                        <br/>
+                        <span t-field="o.note"/>
+                    </div>
+
+                    <!-- Signature -->
+                    <t t-set="signatory_name" t-value="o.company_id.proforma_signatory_name or 'YAYA OUATTARA'"/>
+                    <t t-set="signatory_title" t-value="o.company_id.proforma_signatory_title or 'Directeur Général'"/>
+
+            <div style="text-align: right; margin-top: 60px;">
+                <div style="display: inline-block; text-align: center; width: 200px;">
+                    <div style="margin-bottom: 5px;"></div>
+                    <strong t-esc="signatory_title" style="display: block; font-size: 10px; text-transform: uppercase;"/>
+                    <t t-if="o.company_id.proforma_signature_image">
+                        <div style="margin-bottom: -15px; margin-top: -15px;">
+                            <img t-att-src="image_data_uri(o.company_id.proforma_signature_image)" style="max-height: 80px; max-width: 150px;"/>
+                        </div>
+                    </t>
+                    <span t-esc="signatory_name" style="font-weight: bold; font-size: 12px; margin-top: 5px; display: block;"/>
+                </div>
+            </div>
+
+                </div>
+            </t>
+            <t t-else="">
+                <div>No sale order record found for this report.</div>
+            </t>
+                    </main>
+        </t>
+
+    </template>
+
+</odoo>

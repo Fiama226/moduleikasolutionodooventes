@@ -34,22 +34,6 @@ class ResPartner(models.Model):
     partner_regime_fiscal = fields.Char(string="Régime Fiscal")
 
 
-class IrActionsReport(models.Model):
-    _inherit = "ir.actions.report"
-
-    def render_qweb_pdf(self, res_ids=None, data=None):
-        if self.report_name == "landry_ika_odoo_module.report_bon_commande":
-            orders = self.env["sale.order"].browse(res_ids or [])
-            for order in orders:
-                if order.state not in ("sale", "done"):
-                    raise UserError(
-                        _(
-                            "Le Bon de Commande ne peut être imprimé que pour une commande confirmée (Proforma validée)."
-                        )
-                    )
-        return super().render_qweb_pdf(res_ids=res_ids, data=data)
-
-
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
@@ -70,6 +54,15 @@ class SaleOrder(models.Model):
                 "Elle est valable pendant une durée de 30 jours à compter de la date d'émission. "
                 "Toute commande résultant de cette proforma sera soumise aux conditions générales de vente de la société.",
         help="Conditions générales affichées en bas du rapport proforma.",
+    )
+    proforma_signed = fields.Selection(
+        [
+            ("unsigned", "Non signé"),
+            ("signed", "Signé"),
+        ],
+        string="Proforma signée",
+        default="unsigned",
+        help="Choisir si la proforma doit être imprimée signée ou non.",
     )
 
     @api.model_create_multi
@@ -118,3 +111,7 @@ class SaleOrder(models.Model):
             raise UserError(
                 _("Le Bon de Commande ne peut être imprimé que pour une commande confirmée (Proforma validée).")
             )
+
+    def action_print_sale_document(self):
+        self.ensure_one()
+        return self.env.ref("landry_ika_odoo_module.action_report_sale_order").report_action(self)

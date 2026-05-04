@@ -24,6 +24,14 @@
                        placeholder="ex: Fourniture de matériel informatique"
                        nolabel="1"
                        style="max-width: 300px;"/>
+                       
+                <field name="proforma_signed"
+                       string="Proforma signée"
+                       widget="radio"
+                       options="{'horizontal': true}"
+                       style="margin-left: 120px;"
+                       invisible="state in ('sale', 'done')"/>
+                       
             </field>
 
             <xpath expr="//field[@name='payment_term_id']" position="after">
@@ -34,6 +42,13 @@
                        placeholder="Conditions générales de la proforma..."/>
             </xpath>
 
+            <xpath expr="//header" position="inside">
+                <button name="action_print_sale_document"
+                        type="object"
+                        string="Imprimer document"
+                        class="oe_highlight"
+                        invisible="state not in ('draft', 'sent', 'sale', 'done')"/>
+            </xpath>
     </field>
     </record>
 

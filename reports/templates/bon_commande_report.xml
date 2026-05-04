@@ -2,7 +2,9 @@
 <odoo>
     <template id="report_bon_commande_document">
         <t t-call="landry_ika_odoo_module.external_layout_ika">
-            <t t-set="o" t-value="doc"/>
+                <main>
+            <t t-set="o" t-value="doc or (docs and docs[0])"/>
+            <t t-if="o">
             <div class="page" style="font-family: Arial, Helvetica, sans-serif; color: #000000;">
 
                 <!-- Date -->
@@ -17,13 +19,6 @@
                         BON DE COMMANDE N°
                         <span t-field="o.name"/>
                     </h1>
-                </div>
-
-                <!-- Référence Proforma -->
-                <div t-if="o.proforma_number"
-                     style="text-align: center; margin-bottom: 15px; font-size: 12px; color: #555;">
-                    <strong>Référence Proforma :</strong>
-                    <span t-field="o.proforma_number"/>
                 </div>
 
                 <!-- Infos Client -->
@@ -253,7 +248,7 @@
                 <t t-set="signatory_name" t-value="o.company_id.proforma_signatory_name or 'YAYA OUATTARA'"/>
                 <t t-set="signatory_title" t-value="o.company_id.proforma_signatory_title or 'Directeur Général'"/>
 
-                <table style="width: 100%; margin-top: 60px; border: none; border-collapse: collapse;">
+                <table style="width: 100%; margin-top: 60px;" class="table table-borderless">
                     <tr>
                         <!-- Signature Client (Gauche) -->
                         <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 0 20px;">
@@ -295,24 +290,12 @@
                 </table>
 
             </div>
-        </t>
-    </template>
-
-    <template id="report_bon_commande">
-        <t t-call="web.html_container">
-            <t t-foreach="docs" t-as="doc">
-                <t t-call="landry_ika_odoo_module.report_bon_commande_document"/>
             </t>
+            <t t-else="">
+                <div>No sale order record found for this report.</div>
+            </t>
+                </main>
         </t>
     </template>
 
-    <record id="action_report_bon_commande" model="ir.actions.report">
-        <field name="name">Bon de Commande</field>
-        <field name="model">sale.order</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">landry_ika_odoo_module.report_bon_commande</field>
-        <field name="report_file">landry_ika_odoo_module.report_bon_commande</field>
-        <field name="binding_model_id" ref="sale.model_sale_order"/>
-        <field name="binding_view_types">form</field>
-    </record>
 </odoo>
