@@ -16,7 +16,7 @@ This module provides:
 - Automatic down payment percentage calculation
 - Previous down payments tracking and display
 """,
-    "author": "IKASolution 20",
+    "author": "KABORE Pawendtaore Landry",
     "website": "https://www.ikasolution.com",
     "license": "LGPL-3",
     "depends": ["sale", "web", "account"],

@@ -18,14 +18,14 @@
         </t>
     </template>
 
-    <record id="action_report_sale_order" model="ir.actions.report">
-        <field name="name">Sale Order Report</field>
-        <field name="model">sale.order</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">landry_ika_odoo_module.report_sale_order_document</field>
-        <field name="report_file">landry_ika_odoo_module.report_sale_order_document</field>
-        <field name="print_report_name">'Sale Order - %s' % (object.name)</field>
-        <field name="binding_model_id" ref="sale.model_sale_order"/>
-        <field name="binding_type">report</field>
-    </record>
+<record id="action_report_sale_order" model="ir.actions.report">
+    <field name="name">Sale Order Report</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">landry_ika_odoo_module.report_sale_order_document</field>
+    <field name="report_file">landry_ika_odoo_module.report_sale_order_document</field>
+    <field name="print_report_name">'Sale Order - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
 </odoo>

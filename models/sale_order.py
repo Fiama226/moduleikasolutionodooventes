@@ -6,15 +6,15 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     proforma_signature_image = fields.Image(
-        string="Signature Signataire",
+        string="Signature ",
         max_width=500,
         max_height=200,
     )
     proforma_signatory_name = fields.Char(
-        string="Nom du Signataire",
+        string="Nom  Complet",
     )
     proforma_signatory_title = fields.Char(
-        string="Poste du Signataire",
+        string="Titre",
     )
 
 
@@ -45,15 +45,13 @@ class SaleOrder(models.Model):
     )
     proforma_object = fields.Char(
         string="Objet",
-        required=False,
+        required=True,
         help="Objet de la proforma (ex: Fourniture de matériel informatique)",
     )
-    proforma_terms = fields.Html(
-        string="Conditions Générales",
+    note = fields.Html(
         default="La présente proforma est établie en vue de la fourniture des produits et/ou services y décrits. "
-                "Elle est valable pendant une durée de 30 jours à compter de la date d'émission. "
-                "Toute commande résultant de cette proforma sera soumise aux conditions générales de vente de la société.",
-        help="Conditions générales affichées en bas du rapport proforma.",
+        "Elle est valable pendant une durée de 30 jours à compter de la date d'émission. "
+        "Toute commande résultant de cette proforma sera soumise aux conditions générales de vente de la société.",
     )
     proforma_signed = fields.Selection(
         [
