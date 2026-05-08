@@ -10,8 +10,8 @@ This module provides:
 - Proforma number preserved for reference after confirmation
 - Custom header/footer for all reports
 - Proforma report template
-- Dynamic invoice report selection based on invoice type (normal/downpayment)
-- Popup dialog for selecting invoice type at creation
+- Dynamic invoice report selection based on invoice type (simple/first_dp/nth_dp/balance)
+- Invoice type set automatically via sale.advance.payment.inv wizard
 - 4 invoice templates: simple, final (solde), first down payment, nth down payment
 - Automatic down payment percentage calculation
 - Previous down payments tracking and display
@@ -19,14 +19,13 @@ This module provides:
     "author": "KABORE Pawendtaore Landry",
     "website": "https://www.ikasolution.com",
     "license": "LGPL-3",
-    "depends": ["sale", "web", "account"],
+    "depends": ["sale", "web", "account", "sale_management"],
     "data": [
         "security/ir.model.access.csv",
         "data/sequence_data.xml",
         "views/sale_order_views.xml",
         "views/res_company_views.xml",
         "views/res_partner_views.xml",
-        "views/invoice_type_wizard_views.xml",
         "views/account_move_views.xml",
         "layouts.xml",
         "reports/templates/proforma_report.xml",
@@ -39,6 +38,7 @@ This module provides:
         "reports/templates/first_down_payment_invoice_1.xml",
         "reports/templates/nth_down_payment_invoice.xml",
     ],
+    "post_init_hook": "post_init_hook",
     "application": True,
     "installable": True,
     "auto_install": False,

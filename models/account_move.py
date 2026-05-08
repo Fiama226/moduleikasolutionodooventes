@@ -24,21 +24,35 @@ class AccountMove(models.Model):
         default=False,
         copy=False,
     )
-    invoice_type = fields.Selection(
-        [
-            ("normal", "Facture Normale/Simple"),
-            ("downpayment", "Facture d'Acompte"),
-        ],
-        string="Type de Facture",
-        default="normal",
-        tracking=True,
-        help="Type de facture choisi via le popup de selection",
+    advance_payment_method = fields.Char(
+        string="Méthode de paiement",
+        copy=False,
+        help="Méthode de paiement utilisée pour créer cette facture (percentage, fixed, delivered)",
+    )
+    downpayment_sequence = fields.Integer(
+        string="Séquence d'acompte",
+        default=0,
+        copy=False,
+        help="Numéro de séquence de l'acompte (0 si facture normale)",
     )
     downpayment_sequence_number = fields.Integer(
         string="N° Acompte",
-        default=0,
-        copy=False,
-        help="0 si facture normale, 1+ si acompte",
+        compute="_compute_downpayment_sequence_number",
+        store=True,
+        help="0 si facture normale, 1+ si acompte (pour rapport avec séquence)",
+    )
+    invoice_type = fields.Selection(
+        [
+            ("simple", "Facture Simple"),
+            ("first_dp", "1er Acompte"),
+            ("nth_dp", "Acompte suivant"),
+            ("balance", "Facture de Solde"),
+        ],
+        string="Type de Facture",
+        compute="_compute_invoice_type",
+        store=True,
+        tracking=True,
+        help="Type de facture calculé à partir de advance_payment_method",
     )
     previous_downpayments_count = fields.Integer(
         string="Acomptes precedents",
@@ -67,6 +81,7 @@ class AccountMove(models.Model):
     invoice_type_display = fields.Char(
         string="Type de facture",
         compute="_compute_invoice_type_display",
+        store=False,
     )
     narration = fields.Html(
         default=lambda self: self.DEFAULT_NARRATION,
@@ -100,45 +115,68 @@ class AccountMove(models.Model):
                 move.narration = self.DEFAULT_NARRATION
         return records
 
-    @api.depends("invoice_type", "is_downpayment", "downpayment_sequence_number", "previous_downpayments_count")
+    @api.depends("advance_payment_method", "downpayment_sequence")
     def _compute_custom_report_template(self):
         for rec in self:
-            if rec.invoice_type == "downpayment" or rec.is_downpayment:
-                if rec.downpayment_sequence_number <= 1:
+            apm = rec.advance_payment_method or ""
+            seq = rec.downpayment_sequence or 0
+            if apm in ("percentage", "fixed"):
+                if seq <= 1:
                     rec.custom_report_template = "first_down_payment_invoice_1"
                 else:
                     rec.custom_report_template = "nth_down_payment_invoice"
-            elif rec.invoice_type == "normal":
-                if rec.previous_downpayments_count > 0:
-                    rec.custom_report_template = "final_invoice"
-                else:
-                    rec.custom_report_template = "simple_invoice_1"
+            elif apm == "delivered":
+                rec.custom_report_template = "final_invoice"
             else:
                 rec.custom_report_template = "simple_invoice_1"
 
-    @api.depends("invoice_type", "is_downpayment", "downpayment_sequence_number", "previous_downpayments_count")
+    @api.depends("advance_payment_method", "downpayment_sequence")
     def _compute_invoice_type_display(self):
         for rec in self:
-            if rec.invoice_type == "downpayment" or rec.is_downpayment:
-                ordinal = self._get_ordinal_number(rec.downpayment_sequence_number or 1)
-                rec.invoice_type_display = f"{ordinal} Acompte"
-            elif rec.invoice_type == "normal":
-                if rec.previous_downpayments_count > 0:
-                    rec.invoice_type_display = "Facture Solde"
+            apm = rec.advance_payment_method or ""
+            seq = rec.downpayment_sequence or 0
+            if apm in ("percentage", "fixed"):
+                if seq == 1:
+                    rec.invoice_type_display = "Premier acompte"
+                elif seq == 2:
+                    rec.invoice_type_display = "Deuxième acompte"
+                elif seq == 3:
+                    rec.invoice_type_display = "Troisième acompte"
+                elif seq == 4:
+                    rec.invoice_type_display = "Quatrième acompte"
+                elif seq > 4:
+                    rec.invoice_type_display = f"{seq}ème acompte"
                 else:
-                    rec.invoice_type_display = "Facture Simple"
+                    rec.invoice_type_display = "Acompte"
+            elif apm == "delivered":
+                rec.invoice_type_display = "Facture de Solde"
             else:
-                rec.invoice_type_display = ""
+                rec.invoice_type_display = "Facture Standard"
 
-    @api.depends("sale_order_id", "invoice_type", "is_downpayment", "state")
+    @api.depends("downpayment_sequence")
+    def _compute_downpayment_sequence_number(self):
+        for rec in self:
+            rec.downpayment_sequence_number = rec.downpayment_sequence or 0
+
+    @api.depends("advance_payment_method", "downpayment_sequence")
+    def _compute_invoice_type(self):
+        for rec in self:
+            apm = rec.advance_payment_method or ""
+            seq = rec.downpayment_sequence or 0
+            if apm in ("percentage", "fixed"):
+                rec.invoice_type = "first_dp" if seq <= 1 else "nth_dp"
+            elif apm == "delivered":
+                rec.invoice_type = "balance"
+            else:
+                rec.invoice_type = "simple"
+
+    @api.depends("sale_order_id", "is_downpayment", "state")
     def _compute_previous_downpayments_count(self):
         for rec in self:
             so = rec._get_source_sale_order()
             if so:
                 domain = [
                     ("sale_order_id", "=", so.id),
-                    "|",
-                    ("invoice_type", "=", "downpayment"),
                     ("is_downpayment", "=", True),
                     ("state", "=", "posted"),
                 ]
@@ -148,30 +186,11 @@ class AccountMove(models.Model):
             else:
                 rec.previous_downpayments_count = 0
 
-    @api.depends("sale_order_id", "invoice_type", "is_downpayment", "state")
-    def _compute_total_downpayments_paid(self):
-        for rec in self:
-            so = rec._get_source_sale_order()
-            if so:
-                domain = [
-                    ("sale_order_id", "=", so.id),
-                    "|",
-                    ("invoice_type", "=", "downpayment"),
-                    ("is_downpayment", "=", True),
-                    ("state", "=", "posted"),
-                ]
-                if rec.id:
-                    domain.append(("id", "!=", rec.id))
-                downpayment_invoices = self.search(domain)
-                rec.total_downpayments_paid = sum(inv.amount_total for inv in downpayment_invoices)
-            else:
-                rec.total_downpayments_paid = 0.0
-
-    @api.depends("sale_order_id", "amount_total", "total_downpayments_paid", "invoice_type")
+    @api.depends("sale_order_id", "advance_payment_method", "is_downpayment", "state")
     def _compute_is_final_payment(self):
         for rec in self:
             so = rec._get_source_sale_order()
-            if so and rec.invoice_type == "normal":
+            if so and rec.advance_payment_method == "delivered":
                 rec.is_final_payment = (
                     abs((rec.total_downpayments_paid + rec.amount_total) - so.amount_total) < 0.01
                 )
@@ -206,8 +225,6 @@ class AccountMove(models.Model):
             return []
         domain = [
             ("sale_order_id", "=", so.id),
-            "|",
-            ("invoice_type", "=", "downpayment"),
             ("is_downpayment", "=", True),
             ("id", "!=", self.id),
         ]
@@ -225,32 +242,31 @@ class AccountMove(models.Model):
             })
         return result
 
-    def action_show_invoice_type_dialog(self):
+    def _compute_invoice_type_from_dp_method(self, advance_payment_method, sale_order=None):
         self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "res_model": "account.move.invoice.type.wizard",
-            "view_mode": "form",
-            "target": "new",
-            "context": {
-                "default_move_id": self.id,
-                "default_sale_order_id": self.sale_order_id.id if self.sale_order_id else False,
-            },
-        }
-
-    @api.onchange("invoice_type")
-    def _onchange_invoice_type(self):
-        if self.invoice_type == "normal":
-            self.downpayment_sequence_number = 0
-            self.is_downpayment = False
-        elif self.invoice_type == "downpayment":
+        so = sale_order or self._get_source_sale_order()
+        self.advance_payment_method = advance_payment_method
+        if advance_payment_method in ("percentage", "fixed"):
+            existing_dp = 0
+            if so:
+                existing_dp = self.env["account.move"].search_count([
+                    ("sale_order_id", "=", so.id),
+                    ("is_downpayment", "=", True),
+                    ("state", "=", "posted"),
+                    ("id", "!=", self.id),
+                ])
             self.is_downpayment = True
-            self.downpayment_sequence_number = self.previous_downpayments_count + 1
+            self.downpayment_sequence = existing_dp + 1
+        elif advance_payment_method == "delivered":
+            self.is_downpayment = False
+            self.downpayment_sequence = 0
+        self._compute_invoice_type_display()
+        self._compute_custom_report_template()
 
     def action_post(self):
         res = super().action_post()
         for move in self:
-            if move.is_downpayment or move.invoice_type == "downpayment":
+            if move.is_downpayment or move.advance_payment_method in ("percentage", "fixed"):
                 if not move.fac_number:
                     move.fac_number = (
                         self.env["ir.sequence"]
@@ -259,19 +275,21 @@ class AccountMove(models.Model):
                     )
                 if not move.is_downpayment:
                     move.is_downpayment = True
-                if move.invoice_type != "downpayment":
-                    move.invoice_type = "downpayment"
-                so = move._get_source_sale_order()
-                if so and not move.downpayment_sequence_number:
-                    existing_count = self.env["account.move"].search_count([
-                        ("sale_order_id", "=", so.id),
-                        ("invoice_type", "=", "downpayment"),
-                        ("state", "=", "posted"),
-                        ("id", "!=", move.id),
-                    ])
-                    move.downpayment_sequence_number = existing_count + 1
-                elif not move.downpayment_sequence_number:
-                    move.downpayment_sequence_number = 1
+                if not move.downpayment_sequence:
+                    so = move._get_source_sale_order()
+                    if so:
+                        existing_count = self.env["account.move"].search_count([
+                            ("sale_order_id", "=", so.id),
+                            ("is_downpayment", "=", True),
+                            ("state", "=", "posted"),
+                            ("id", "!=", move.id),
+                        ])
+                    move.downpayment_sequence = existing_count + 1
+                else:
+                    move.downpayment_sequence = 1
+            elif move.advance_payment_method == "delivered":
+                move.is_downpayment = False
+                move.downpayment_sequence = 0
             move._compute_custom_report_template()
         return res
 

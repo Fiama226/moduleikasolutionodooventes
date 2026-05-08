@@ -8,22 +8,14 @@
     <field name="arch" type="xml">
         <xpath expr="//group[@id='header_right_group']" position="inside">
             <field name="invoice_type_display" readonly="1"
-                   invisible="not invoice_type_display"
-                   string="Type de facture"
-                   style="font-weight: 600; color: #856404; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 4px 10px;"/>
+                invisible="move_type != 'out_invoice'"
+                string="Type de facture"
+                style="font-weight: 600; color: #856404; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 4px 10px;"/>
         </xpath>
         <xpath expr="//field[@name='invoice_date']" position="after">
             <field name="invoice_object" placeholder="Objet de la facture"/>
         </xpath>
-        <xpath expr="//group[@id='header_right_group']" position="inside">
-            <button name="action_show_invoice_type_dialog"
-                    type="object"
-                    string="Type de facture"
-                    class="btn btn-warning btn-sm oe_highlight"
-                    invisible="state != 'draft'"
-                    icon="fa-exchange"/>
-        </xpath>
     </field>
-    </record>
+</record>
 
 </odoo>

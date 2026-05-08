@@ -3,5 +3,3 @@ access_sale_order_ika,sale.order.ika,sale.model_sale_order,sales_team.group_sale
 access_res_company_ika,res.company.ika,base.model_res_company,base.group_system,1,1,1,0
 access_res_partner_ika,res.partner.ika,base.model_res_partner,base.group_user,1,1,1,0
 access_account_move_ika,account.move.ika,account.model_account_move,sales_team.group_sale_salesman,1,1,1,0
-access_invoice_type_wizard_user,invoice.type.wizard.user,model_account_move_invoice_type_wizard,base.group_user,1,1,1,0
-access_invoice_type_wizard_manager,invoice.type.wizard.manager,model_account_move_invoice_type_wizard,account.group_account_manager,1,1,1,1
